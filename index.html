@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>8. Ayımız Kutlu Olsun ❤️</title>
+    <style>
+        body {
+            margin: 0; padding: 0;
+            background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #ffd1ff, #fbc2eb);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            height: 100vh; width: 100vw;
+            user-select: none; -webkit-user-select: none;
+            cursor: default; text-align: center;
+        }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .hidden { display: none !important; }
+
+        /* UI LAYER */
+        #ui-layer { position: fixed; top: 10px; left: 10px; z-index: 20000; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+        .score-box { background: rgba(255,255,255,0.95); padding: 8px 15px; border-radius: 20px; font-weight: bold; color: #d63384; box-shadow: 0 5px 15px rgba(0,0,0,0.1); font-size: 1.1rem; display: flex; align-items: center; gap: 5px; border: 2px solid #ffadd2; }
+        .shop-btn { background: #ffc107; border: none; padding: 10px 15px; border-radius: 15px; cursor: pointer; font-weight: bold; color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,0.3); box-shadow: 0 5px 10px rgba(0,0,0,0.1); transition: 0.2s; text-align: left; width: 140px; }
+        .shop-btn:active { transform: scale(0.95); }
+        .shop-btn-girl { background: #9b59b6; display: none; }
+
+        /* --- KEDİ SAHNESİ (DÜZELTİLDİ) --- */
+        #scene-container {
+            position: fixed;
+            /* BAŞLANGIÇ: SOL ALT KÖŞE */
+            bottom: 20px; 
+            left: 20px;
+            width: 130px; /* Başta küçük */
+            height: auto;
+            z-index: 5000;
+            transition: all 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Havalı geçiş efekti */
+            cursor: pointer; /* Tıklanabilir */
+        }
+
+        /* ORTAYA GELME EFEKTİ (Class ile eklenecek) */
+        .cat-center-mode {
+            bottom: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, 50%) scale(4.0) !important; /* Ortaya gel ve BÜYÜ */
+            pointer-events: auto;
+        }
+
+        #scene-img { width: 100%; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2)); transition: transform 0.1s; }
+        #scene-img:active { transform: scale(0.90); } /* Tıklayınca küçülme tepkisi */
+
+        /* SEVME EFEKTİ (Kalp) */
+        .love-popup {
+            position: absolute;
+            color: #ff0055;
+            font-size: 30px;
+            font-weight: bold;
+            pointer-events: none;
+            animation: floatLove 1s forwards;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            z-index: 6000;
+        }
+        @keyframes floatLove {
+            0% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50px) scale(1.5); opacity: 0; }
+        }
+
+        /* DUMAN EFEKTİ */
+        #smoke-effect {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            width: 350px; height: 350px;
+            background: radial-gradient(circle, rgba(255,255,255,1) 20%, rgba(255,255,255,0.8) 40%, rgba(255,255,255,0) 70%);
+            border-radius: 50%; pointer-events: none; z-index: 5001; opacity: 0;
+        }
+        .puff-anim { animation: puff 0.8s ease-out forwards; }
+        @keyframes puff { 0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0.8; } 40% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(2); opacity: 0; } }
+
+        /* MARKETLER & LEVELLER (Aynı) */
+        .shop-modal { position: fixed; top: 10px; left: 160px; background: rgba(255, 255, 255, 0.95); width: 250px; max-height: 80vh; overflow-y: auto; border-radius: 15px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 30000; display: none; border: 3px solid #ffc107; }
+        #shop-modal-girl { border-color: #9b59b6; }
+        .shop-header { font-size: 1rem; color: #333; margin-bottom: 10px; font-weight: bold; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+        .shop-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 8px 0; }
+        .item-name { font-size: 0.9rem; font-weight: bold; color: #555; }
+        .buy-btn { background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 10px; cursor: pointer; font-size: 0.8rem; min-width: 60px; }
+        .buy-btn:disabled { background: #777; cursor: not-allowed; opacity: 0.7; }
+        .buy-btn.locked { background: #ddd; color: #aaa; cursor: not-allowed; }
+
+        #intro-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; transition: opacity 1s ease; }
+        .gallery { display: flex; gap: 15px; }
+        .photo-card { width: 120px; height: 160px; border: 4px solid white; border-radius: 10px; overflow: hidden; background: white; }
+        .photo-card img { width: 100%; height: 100%; object-fit: cover; }
+        #game-area-hearts { width: 100%; height: 100%; position: relative; }
+        .collectible-heart { position: absolute; font-size: 50px; animation: bounceHeart 1.5s infinite; cursor: pointer; }
+        @keyframes bounceHeart { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+        #basket-game-area { width: 100%; height: 100%; position: relative; overflow: hidden; cursor: none; }
+        #basket { position: absolute; bottom: 50px; left: 50%; width: 80px; height: 50px; background: #fff; border-radius: 0 0 40px 40px; border: 4px solid #d63384; transform: translateX(-50%); display: flex; justify-content: center; align-items: center; font-size: 24px; z-index: 500; }
+        .falling-heart { position: absolute; font-size: 30px; color: #ff0055; top: -50px; }
+        #hold-area { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
+        .big-heart-container { width: 200px; height: 180px; position: relative; margin-bottom: 30px; }
+        .heart-shape { width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.3); position: relative; clip-path: path('M100 160 C 20 100, 0 50, 50 10 C 75 -10, 100 20, 100 20 C 100 20, 125 -10, 150 10 C 200 50, 180 100, 100 160 Z'); overflow: hidden; }
+        .liquid { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: #ff0055; transition: height 0.1s linear; box-shadow: 0 0 20px #ff0055; }
+        .hold-btn { background: white; color: #d63384; border: none; padding: 20px 40px; font-size: 1.2rem; border-radius: 50px; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.2); cursor: pointer; transition: transform 0.1s; user-select: none; -webkit-tap-highlight-color: transparent; }
+        .hold-btn:active { transform: scale(0.95); background: #ffeef5; }
+        #endgame-area { width: 100%; height: 100%; position: relative; }
+        .grind-heart { position: absolute; top: 50%; right: 10%; transform: translateY(-50%); font-size: 80px; cursor: pointer; transition: transform 0.1s; filter: drop-shadow(0 0 10px rgba(255,255,255,0.8)); }
+        .grind-heart:active { transform: translateY(-50%) scale(0.9); }
+        .final-msg { position: absolute; top: 10%; width: 100%; text-align: center; color: #d63384; font-size: 1.2rem; font-weight: bold; text-shadow: 0 2px 5px rgba(255,255,255,0.8); }
+        .confetti { position: absolute; width: 10px; height: 10px; background-color: #f00; animation: confetti-fall 4s linear forwards; top: -10vh; z-index: 50; }
+        @keyframes confetti-fall { 100% { transform: translateY(110vh) rotate(720deg); opacity: 0;} }
+        .snowflake { position: fixed; top: -10px; color: white; font-size: 1em; animation: fall linear forwards; z-index: 9999; pointer-events: none; }
+        @keyframes fall { to { transform: translateY(110vh); } }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <audio id="askimSarkisi" loop><source src="sarki.mp3" type="audio/mpeg"></audio>
+
+    <div id="ui-layer">
+        <div class="score-box">❤️ <span id="score">0</span></div>
+        <button class="shop-btn" onclick="toggleShop('shop-modal')">🐱</button>
+        <button class="shop-btn shop-btn-girl" id="btn-girl-shop" onclick="toggleShop('shop-modal-girl')">🦊</button>
+    </div>
+
+    <div id="scene-container" onclick="petCat()">
+        <div id="smoke-effect"></div>
+        <img id="scene-img" src="" alt="Sahne">
+    </div>
+
+    <div id="shop-modal" class="shop-modal">
+        <div class="shop-header">🐱 Kendin İçin Al (Sırayla)</div>
+        <div id="market-list-1"></div>
+        <button onclick="toggleShop('shop-modal')" style="margin-top:10px; width:100%; padding:5px; border:none; background:#eee; border-radius:5px;">Kapat</button>
+    </div>
+
+    <div id="shop-modal-girl" class="shop-modal" style="border-color:#9b59b6;">
+        <div class="shop-header">🦊 Benim İçin Al</div>
+        <div id="market-list-2"></div>
+        <button onclick="toggleShop('shop-modal-girl')" style="margin-top:10px; width:100%; padding:5px; border:none; background:#eee; border-radius:5px;">Kapat</button>
+    </div>
+
+    <div id="intro-screen"><div class="gallery"><div class="photo-card"><img src="https://i.hizliresim.com/1ap4w22.jpeg"></div><div class="photo-card"><img src="https://i.hizliresim.com/dqz6uv6.jpeg"></div></div><h2 style="color:white; margin-top:20px; text-shadow:0 2px 5px rgba(0,0,0,0.3);">ASKŞMMM❤️</h2></div>
+    <div id="game-area-hearts" class="hidden"><h2 style="color:white; margin-top:50px; text-shadow:0 2px 5px rgba(0,0,0,0.2);">KALPLERİ TOPLA! 👇</h2></div>
+    <div id="basket-game-area" class="hidden"><h3 style="color:white; padding-top:20px;">Kalpleri Yakala! (Hızlı Ol)</h3><div id="basket">🫙</div></div>
+    <div id="hold-area" class="hidden"><div class="big-heart-container"><div class="heart-shape"><div class="liquid" id="liquid-fill"></div></div></div><h3 style="color:white; margin-bottom:20px; text-shadow:0 2px 5px rgba(0,0,0,0.2);">ne kadar seviyon</h3><button class="hold-btn" id="loveBtn">Basılı Tut ❤️</button></div>
+    <div id="endgame-area" class="hidden"><div class="final-msg">8. Ayımız Kutlu Olsun!<br>Kediye eşya alll ❤️</div><div class="grind-heart" onclick="clickGrindHeart()">💖</div></div>
+
+    <script>
+        // --- RESİM LİNKLERİ (BURAYI DOLDUR!) ---
+        const sceneImages = [
+            "https://i.hizliresim.com/lvjnsz3.png",       // 0
+            "https://i.hizliresim.com/r0to0ez.png",           // 1
+            "https://i.hizliresim.com/87tklxv.png",           // 2
+            "https://i.hizliresim.com/t9fyyyr.png",           // 3
+            "https://i.hizliresim.com/qrymtvo.png",           // 4
+            "https://i.hizliresim.com/j27r9y9.png",          // 5
+            "https://i.hizliresim.com/8tsvfsq.png",         // 6
+            "https://i.hizliresim.com/ar5sii9.png",            // 7
+            "https://i.hizliresim.com/dqmkd3x.png",         // 8
+            "https://i.hizliresim.com/r6j92to.png",           // 9
+            "https://i.hizliresim.com/jbnz5k6.png",// 10
+            "https://i.hizliresim.com/luwe8py.png",     // 11
+            "https://i.hizliresim.com/nxyfl1s.png",     // 12
+            "https://i.hizliresim.com/2b6u776.png",      // 13
+            "https://i.hizliresim.com/az26djb.png",    // 14
+            "https://i.hizliresim.com/dhgutzc.png"      // 15
+        ];
+
+        const market1 = [
+            { name: "Halı", cost: 2 },
+            { name: "Ufak Masa", cost: 3 },
+            { name: "Bere", cost: 2 },
+            { name: "Atkı", cost: 2 },
+            { name: "Patikler", cost: 3 },
+            { name: "Yastık", cost: 3 },
+            { name: "Süt Kasesi", cost: 3 },
+            { name: "Mısır Gevreği", cost: 2 },
+            { name: "Çam Ağacı", cost: 15 },
+            { name: "Şömine", cost: 15 }
+        ];
+
+        const market2 = [
+            { name: "Bere (Senin bana ördüğün)", cost: 2 },
+            { name: "Atkı (Senin bana ördüğün)", cost: 3 },
+            { name: "Patik (Senin bana ördüğün)", cost: 2 },
+            { name: "Sana aldığım hediyeler", cost: 3 },
+            { name: "İkili Battaniye", cost: 5 }
+        ];
+
+        let currentLevel = 0;
+        let totalHearts = 0;
+        const sceneImg = document.getElementById('scene-img');
+        sceneImg.src = sceneImages[0] || ""; 
+
+        // --- SEVME FONKSİYONU (TIKLAYINCA) ---
+        function petCat() {
+            const container = document.getElementById('scene-container');
+            const heart = document.createElement('div');
+            heart.classList.add('love-popup');
+            heart.innerHTML = '❤️';
+            container.appendChild(heart);
+            // Kalbi 1 saniye sonra sil
+            setTimeout(() => heart.remove(), 1000);
+        }
+
+        // --- DUMAN EFEKTİ ---
+        function triggerSmoke() {
+            const smoke = document.getElementById('smoke-effect');
+            smoke.classList.remove('puff-anim');
+            void smoke.offsetWidth; 
+            smoke.classList.add('puff-anim');
+        }
+
+        // --- MARKET RENDER ---
+        function renderMarkets() {
+            const list1 = document.getElementById('market-list-1');
+            list1.innerHTML = "";
+            market1.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'shop-item';
+                let btnState = "", btnText = item.cost + " ❤️";
+                if (index < currentLevel) { btnState = "disabled"; btnText = "Alındı ✅"; }
+                else if (index === currentLevel) { btnState = `onclick="buyItem(1, ${index}, ${item.cost})"`; }
+                else { btnState = 'disabled class="buy-btn locked"'; btnText = "🔒"; }
+                div.innerHTML = `<span class="item-name">${index+1}. ${item.name}</span><button class="buy-btn ${index > currentLevel ? 'locked' : ''}" ${btnState}>${btnText}</button>`;
+                list1.appendChild(div);
+            });
+
+            const list2 = document.getElementById('market-list-2');
+            list2.innerHTML = "";
+            market2.forEach((item, index) => {
+                const targetLevel = 10 + index + 1;
+                const div = document.createElement('div');
+                div.className = 'shop-item';
+                let btnState = "", btnText = item.cost + " ❤️";
+                if (targetLevel <= currentLevel) { btnState = "disabled"; btnText = "Alındı ✅"; }
+                else if (targetLevel === currentLevel + 1) { btnState = `onclick="buyItem(2, ${index}, ${item.cost})"`; }
+                else { btnState = 'disabled class="buy-btn locked"'; btnText = "🔒"; }
+                div.innerHTML = `<span class="item-name">${index+1}. ${item.name}</span><button class="buy-btn ${targetLevel > currentLevel+1 ? 'locked' : ''}" ${btnState}>${btnText}</button>`;
+                list2.appendChild(div);
+            });
+        }
+
+        // --- SATIN ALMA ---
+        function buyItem(marketId, itemIndex, cost) {
+            if(totalHearts >= cost) {
+                addHeart(-cost);
+                currentLevel++;
+                spawnConfetti(20);
+                triggerSmoke();
+
+                setTimeout(() => {
+                    if(sceneImages[currentLevel]) sceneImg.src = sceneImages[currentLevel];
+                }, 350);
+
+                if (currentLevel === 10) {
+                    setTimeout(() => {
+                        alert("Şömine sıcacık oldu... Ve kapı çaldı! BEN GELDİMM! 😻\n(Yeni Market Açıldı)");
+                        document.getElementById('btn-girl-shop').style.display = 'block';
+                        toggleShop('shop-modal'); 
+                        setTimeout(() => toggleShop('shop-modal-girl'), 500);
+                    }, 1000);
+                }
+                if (currentLevel === 15) {
+                    toggleShop('shop-modal-girl');
+                    setTimeout(() => { startSnow(); alert("Her şey tamamlandı. Sıcacık ve yumuşakız kudummmm seni çok seviyorum	 ❤️❄️"); }, 2000);
+                }
+                renderMarkets();
+            } else {
+                alert("Kalbin yetmiyor :( Biraz sağdaki kalbe tıkla!");
+            }
+        }
+
+        function startSnow() { setInterval(() => { const flake = document.createElement('div'); flake.classList.add('snowflake'); flake.innerHTML = '❄️'; flake.style.left = Math.random() * 100 + 'vw'; flake.style.animationDuration = Math.random() * 3 + 2 + 's'; flake.style.opacity = Math.random(); document.body.appendChild(flake); setTimeout(() => flake.remove(), 5000); }, 200); }
+        function toggleShop(id) { const modal = document.getElementById(id); document.querySelectorAll('.shop-modal').forEach(m => { if(m.id !== id) m.style.display = 'none'; }); modal.style.display = (modal.style.display === 'block') ? 'none' : 'block'; }
+        const scoreEl = document.getElementById('score');
+        document.body.addEventListener('click', function() { var audio = document.getElementById("askimSarkisi"); if (audio.paused) { audio.play(); } }, { once: true });
+        function addHeart(amount) { totalHearts += amount; scoreEl.innerText = totalHearts; renderMarkets(); }
+        function spawnConfetti(amount) { const colors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f']; for (let i = 0; i < amount; i++) { const div = document.createElement('div'); div.classList.add('confetti'); div.style.left = Math.random() * 100 + 'vw'; div.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)]; div.style.animationDuration = (Math.random() * 3 + 2) + "s"; document.body.appendChild(div); setTimeout(() => div.remove(), 5000); } }
+        setTimeout(() => { document.getElementById('intro-screen').style.opacity = '0'; setTimeout(() => { document.getElementById('intro-screen').classList.add('hidden'); document.getElementById('game-area-hearts').classList.remove('hidden'); initLevel2(); }, 1000); }, 5000);
+        function initLevel2() { const area = document.getElementById('game-area-hearts'); let collected = 0; for(let i=0; i<8; i++) { const heart = document.createElement('div'); heart.classList.add('collectible-heart'); heart.innerHTML = '💖'; heart.style.left = Math.random() * 80 + 10 + '%'; heart.style.top = Math.random() * 60 + 20 + '%'; heart.onclick = function() { this.remove(); addHeart(1); collected++; if(collected === 8) { setTimeout(() => { area.classList.add('hidden'); document.getElementById('basket-game-area').classList.remove('hidden'); initLevel3(); }, 500); } }; area.appendChild(heart); } }
+        function initLevel3() { const basket = document.getElementById('basket'); const gameArea = document.getElementById('basket-game-area'); const moveBasket = (x) => { basket.style.left = x + 'px'; }; document.addEventListener('mousemove', (e) => moveBasket(e.clientX)); document.addEventListener('touchmove', (e) => moveBasket(e.touches[0].clientX)); let heartsSpawned = 0; const maxHearts = 27; const rainInterval = setInterval(() => { if(heartsSpawned >= maxHearts) { clearInterval(rainInterval); setTimeout(() => { document.getElementById('basket-game-area').classList.add('hidden'); document.getElementById('hold-area').classList.remove('hidden'); initLevel4(); }, 3000); return; } spawnFallingHeart(gameArea, basket); heartsSpawned++; }, 600); }
+        function spawnFallingHeart(area, basket) { const heart = document.createElement('div'); heart.classList.add('falling-heart'); heart.innerHTML = '❤️'; heart.style.left = Math.random() * 90 + 5 + '%'; area.appendChild(heart); let topPos = -50; const fallAnim = setInterval(() => { topPos += (Math.random() * 3 + 2); heart.style.top = topPos + 'px'; const heartRect = heart.getBoundingClientRect(); const basketRect = basket.getBoundingClientRect(); if (heartRect.bottom >= basketRect.top && heartRect.top <= basketRect.bottom && heartRect.left >= basketRect.left && heartRect.right <= basketRect.right) { addHeart(1); heart.remove(); clearInterval(fallAnim); basket.style.transform = "translateX(-50%) scale(1.2)"; setTimeout(() => basket.style.transform = "translateX(-50%) scale(1)", 100); } if (topPos > window.innerHeight) { heart.remove(); clearInterval(fallAnim); } }, 20); }
+        function initLevel4() { const btn = document.getElementById('loveBtn'); const liquid = document.getElementById('liquid-fill'); let fillLevel = 0; let timer; const startFilling = (e) => { e.preventDefault(); timer = setInterval(() => { if(fillLevel < 100) { fillLevel += 1; liquid.style.height = fillLevel + '%'; } else { clearInterval(timer); finishGame(); } }, 50); }; const stopFilling = () => { clearInterval(timer); }; btn.addEventListener('touchstart', startFilling); btn.addEventListener('touchend', stopFilling); btn.addEventListener('mousedown', startFilling); btn.addEventListener('mouseup', stopFilling); }
+        
+        // FİNAL OYUNU BİTİNCE ÇAĞRILAN FONKSİYON
+        function finishGame() { 
+            document.getElementById('hold-area').classList.add('hidden'); 
+            document.getElementById('endgame-area').classList.remove('hidden'); 
+            
+            // KEDİYİ ORTAYA AL
+            document.getElementById('scene-container').classList.add('cat-center-mode');
+
+            addHeart(30); 
+            alert("Aşkınla Kalp Doldu! +30 Kalp Kazandın! 🎉\nŞimdi sol üstten markete girip evi döşe!"); 
+            spawnConfetti(100); 
+            renderMarkets(); 
+        }
+        
+        function clickGrindHeart() { addHeart(1); const floatH = document.createElement('div'); floatH.innerHTML = '+1'; floatH.style.position='absolute'; floatH.style.top='50%'; floatH.style.right='15%'; floatH.style.color='#fff'; floatH.style.fontWeight='bold'; floatH.style.transition='1s'; document.getElementById('endgame-area').appendChild(floatH); setTimeout(() => { floatH.style.top='40%'; floatH.style.opacity=0; }, 10); setTimeout(() => floatH.remove(), 1000); }
+
+        renderMarkets();
+    </script>
+</body>
+</html>
